@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的文档 - 类似Typora</title>
+    <title>我的文档 - Typora风格</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Docsify核心样式 -->
@@ -12,503 +12,1115 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* ===== 侧边栏标签页样式 ===== */
+        /* ===== CSS变量定义 ===== */
+        :root {
+            /* 颜色系统 */
+            --primary-color: #1890ff;
+            --primary-hover: #40a9ff;
+            --success-color: #52c41a;
+            --warning-color: #faad14;
+            --error-color: #f5222d;
+            
+            /* 灰色阶 */
+            --gray-1: #ffffff;
+            --gray-2: #fafafa;
+            --gray-3: #f5f5f5;
+            --gray-4: #e8e8e8;
+            --gray-5: #d9d9d9;
+            --gray-6: #bfbfbf;
+            --gray-7: #8c8c8c;
+            --gray-8: #595959;
+            --gray-9: #262626;
+            --gray-10: #000000;
+            
+            /* 布局 */
+            --sidebar-width: 280px;
+            --header-height: 64px;
+            --border-radius: 6px;
+            --transition-speed: 0.3s;
+            
+            /* 层级颜色 */
+            --level-1-color: #262626;
+            --level-2-color: #595959;
+            --level-3-color: #8c8c8c;
+            --level-4-color: #bfbfbf;
+            --level-bg-1: #ffffff;
+            --level-bg-2: #fafafa;
+            --level-bg-3: #f5f5f5;
+        }
+        
+        /* ===== 全局重置 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5715;
+            color: var(--gray-9);
+            background: var(--gray-1);
+            overflow-x: hidden;
+        }
+        
+        /* ===== 主布局 ===== */
+        #app {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* ===== 侧边栏容器 ===== */
+        .sidebar-container {
+            width: var(--sidebar-width);
+            background: var(--gray-1);
+            border-right: 1px solid var(--gray-4);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+            transition: all var(--transition-speed);
+        }
+        
+        /* ===== 侧边栏标签页 ===== */
         .sidebar-tabs {
             display: flex;
-            border-bottom: 1px solid #e9ecef;
-            background: #f8f9fa;
-            padding: 0 10px;
+            background: var(--gray-2);
+            border-bottom: 1px solid var(--gray-4);
+            padding: 0 16px;
+            height: 48px;
+            flex-shrink: 0;
         }
         
         .sidebar-tab {
             flex: 1;
-            padding: 12px 15px;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 14px;
-            color: #495057;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            padding: 0 16px;
+            height: 100%;
+            border: none;
+            background: none;
+            color: var(--gray-7);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            border-bottom: 2px solid transparent;
         }
         
         .sidebar-tab:hover {
-            background: #e9ecef;
-            color: #007bff;
+            color: var(--gray-9);
+            background: var(--gray-3);
         }
         
         .sidebar-tab.active {
-            color: #007bff;
-            border-bottom-color: #007bff;
-            background: #fff;
-            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: var(--gray-1);
+            font-weight: 500;
         }
         
         .sidebar-tab i {
             font-size: 16px;
         }
         
-        /* ===== 侧边栏内容区 ===== */
-        .sidebar-content {
-            padding: 15px;
-            height: calc(100vh - 60px);
-            overflow-y: auto;
+        .sidebar-tab .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
         }
         
-        /* 文件树容器 */
-        #file-tree {
+        /* ===== 侧边栏内容区 ===== */
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gray-5) transparent;
+        }
+        
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: var(--gray-5);
+            border-radius: 3px;
+        }
+        
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-6);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
             display: block;
         }
         
-        /* 大纲容器 */
-        #page-outline {
-            display: none;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        /* ===== 文件树样式（类似Typora） ===== */
+        /* ===== 文件树样式 ===== */
         .file-tree {
             list-style: none;
-            padding-left: 0;
+            padding: 0;
             margin: 0;
-        }
-        
-        .file-tree li {
-            margin: 4px 0;
-            position: relative;
         }
         
         .file-tree ul {
             list-style: none;
-            padding-left: 20px;
-            margin: 2px 0;
-            border-left: 1px solid #dee2e6;
-            margin-left: 10px;
-        }
-        
-        /* 文件夹和文件图标 */
-        .file-tree .folder::before {
-            content: '📁 ';
-            margin-right: 6px;
-            font-size: 14px;
-        }
-        
-        .file-tree .file::before {
-            content: '📄 ';
-            margin-right: 6px;
-            font-size: 14px;
-        }
-        
-        /* 可折叠的文件夹 */
-        .file-tree .folder.collapsible {
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        .file-tree .folder.collapsible::before {
-            content: '📂 ';
-            transition: transform 0.3s;
-        }
-        
-        .file-tree .folder.collapsible.collapsed::before {
-            content: '📁 ';
-        }
-        
-        /* 文件夹子项隐藏/显示 */
-        .file-tree .folder.collapsed + ul {
-            display: none;
-        }
-        
-        .file-tree .folder:not(.collapsed) + ul {
-            display: block;
-        }
-        
-        /* 文件链接样式 */
-        .file-tree a {
-            color: #2c3e50;
-            text-decoration: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            display: block;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        
-        .file-tree a:hover {
-            background: #e9ecef;
-            color: #007bff;
-        }
-        
-        .file-tree li.active > a {
-            background: #007bff;
-            color: white;
-            font-weight: 500;
-        }
-        
-        /* ===== 大纲样式（类似Typora） ===== */
-        .page-outline {
-            list-style: none;
             padding-left: 0;
             margin: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
         }
         
-        .page-outline li {
-            margin: 4px 0;
+        .file-tree li {
             position: relative;
         }
         
-        /* 大纲层级缩进 */
-        .outline-h1 { padding-left: 0; font-weight: 600; font-size: 15px; }
-        .outline-h2 { padding-left: 15px; font-size: 14px; }
-        .outline-h3 { padding-left: 30px; font-size: 13px; color: #666; }
-        .outline-h4 { padding-left: 45px; font-size: 12px; color: #888; }
-        .outline-h5 { padding-left: 60px; font-size: 12px; color: #aaa; }
-        .outline-h6 { padding-left: 75px; font-size: 11px; color: #ccc; }
+        /* 层级缩进和颜色 */
+        .file-tree > li > .tree-item {
+            padding-left: 20px;
+        }
         
-        .page-outline a {
-            color: #2c3e50;
+        .file-tree ul > li > .tree-item {
+            padding-left: 36px;
+        }
+        
+        .file-tree ul ul > li > .tree-item {
+            padding-left: 52px;
+            background: var(--level-bg-2);
+        }
+        
+        .file-tree ul ul ul > li > .tree-item {
+            padding-left: 68px;
+            background: var(--level-bg-3);
+        }
+        
+        .file-tree ul ul ul ul > li > .tree-item {
+            padding-left: 84px;
+        }
+        
+        /* 层级边框线 */
+        .file-tree ul ul > li > .tree-item::before {
+            content: '';
+            position: absolute;
+            left: 36px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--gray-4), transparent);
+        }
+        
+        /* 树节点项 */
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 20px;
+            color: var(--gray-8);
             text-decoration: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            display: block;
             transition: all 0.2s;
-            font-size: 14px;
+            position: relative;
+            border-left: 3px solid transparent;
+            margin: 1px 0;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
         }
         
-        .page-outline a:hover {
-            background: #e9ecef;
-            color: #007bff;
+        .tree-item:hover {
+            background: var(--gray-3);
+            color: var(--gray-9);
+            border-left-color: var(--primary-hover);
         }
         
-        .page-outline li.active > a {
-            background: #e9ecef;
-            color: #007bff;
+        .tree-item.active {
+            background: linear-gradient(90deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
             font-weight: 500;
         }
         
-        /* ===== 响应式调整 ===== */
+        .tree-item.level-1 {
+            color: var(--level-1-color);
+            font-weight: 600;
+        }
+        
+        .tree-item.level-2 {
+            color: var(--level-2-color);
+        }
+        
+        .tree-item.level-3 {
+            color: var(--level-3-color);
+            font-size: 13px;
+        }
+        
+        .tree-item.level-4 {
+            color: var(--level-4-color);
+            font-size: 12px;
+        }
+        
+        /* 图标样式 */
+        .tree-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            color: var(--gray-6);
+        }
+        
+        .tree-item:hover .tree-icon {
+            color: var(--gray-7);
+        }
+        
+        .tree-item.active .tree-icon {
+            color: var(--primary-color);
+        }
+        
+        .folder .tree-icon {
+            color: #faad14;
+        }
+        
+        /* 文件夹折叠箭头 */
+        .folder .tree-icon i {
+            transition: transform 0.3s ease;
+        }
+        
+        .folder.collapsed .tree-icon i {
+            transform: rotate(-90deg);
+        }
+        
+        /* 文件内容 */
+        .tree-content {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* 状态指示器 */
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-left: 8px;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+        
+        .status-dot.new {
+            background: var(--success-color);
+        }
+        
+        .status-dot.modified {
+            background: var(--warning-color);
+        }
+        
+        .status-dot.locked {
+            background: var(--error-color);
+        }
+        
+        /* ===== 大纲样式 ===== */
+        .page-outline {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .outline-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 20px;
+            color: var(--gray-7);
+            text-decoration: none;
+            transition: all 0.2s;
+            position: relative;
+            border-left: 2px solid transparent;
+            margin: 1px 0;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        .outline-item:hover {
+            background: var(--gray-3);
+            color: var(--gray-9);
+            border-left-color: var(--gray-6);
+        }
+        
+        .outline-item.active {
+            background: linear-gradient(90deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 大纲层级 */
+        .outline-h1 {
+            padding-left: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--level-1-color);
+        }
+        
+        .outline-h2 {
+            padding-left: 32px;
+            font-size: 14px;
+            color: var(--level-2-color);
+            border-left-color: #d9d9d9;
+        }
+        
+        .outline-h3 {
+            padding-left: 44px;
+            font-size: 13px;
+            color: var(--level-3-color);
+            border-left-color: #e8e8e8;
+        }
+        
+        .outline-h4 {
+            padding-left: 56px;
+            font-size: 12px;
+            color: var(--level-4-color);
+            border-left-color: #f0f0f0;
+        }
+        
+        /* 大纲图标 */
+        .outline-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--gray-5);
+            font-size: 12px;
+        }
+        
+        .outline-h1 .outline-icon {
+            color: var(--primary-color);
+        }
+        
+        /* ===== 主内容区 ===== */
+        .content-wrapper {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 24px 48px;
+            max-width: 1200px;
+            min-width: 0;
+            transition: margin-left var(--transition-speed);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .content-wrapper {
+                padding: 20px 32px;
+            }
+        }
+        
         @media (max-width: 768px) {
-            .sidebar-tab span {
-                display: none;
+            .sidebar-container {
+                transform: translateX(-100%);
             }
             
-            .sidebar-tab i {
-                font-size: 18px;
+            .sidebar-container.show {
+                transform: translateX(0);
             }
+            
+            .content-wrapper {
+                margin-left: 0;
+                padding: 16px;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+        }
+        
+        /* 移动端切换按钮 */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            font-size: 18px;
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--gray-6);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        /* 动画效果 */
+        .slide-enter-active,
+        .slide-leave-active {
+            transition: all 0.3s ease;
+        }
+        
+        .slide-enter-from,
+        .slide-leave-to {
+            opacity: 0;
+            transform: translateX(-10px);
         }
     </style>
 </head>
 <body>
-    <!-- 主容器 -->
+    <!-- 移动端切换按钮 -->
+    <button class="mobile-toggle" id="mobileToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- 主应用容器 -->
     <div id="app"></div>
-    
+
     <!-- 自定义侧边栏模板 -->
     <script type="text/template" id="custom-sidebar">
-        <div class="sidebar-tabs">
-            <button class="sidebar-tab active" data-tab="file-tree">
-                <i class="fas fa-folder-tree"></i>
-                <span>文件树</span>
-            </button>
-            <button class="sidebar-tab" data-tab="page-outline">
-                <i class="fas fa-list"></i>
-                <span>大纲</span>
-            </button>
-        </div>
-        
-        <div class="sidebar-content">
+        <div class="sidebar-container">
+            <!-- 标签页切换 -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="file-tree">
+                    <i class="fas fa-folder-tree"></i>
+                    <span>文件树</span>
+                    <span class="badge" id="file-count">0</span>
+                </button>
+                <button class="sidebar-tab" data-tab="page-outline">
+                    <i class="fas fa-list-ol"></i>
+                    <span>大纲</span>
+                    <span class="badge" id="heading-count">0</span>
+                </button>
+            </div>
+
             <!-- 文件树内容 -->
-            <div id="file-tree" class="tab-content active">
-                <ul class="file-tree">
-                    <!-- 动态生成文件树 -->
-                </ul>
+            <div class="sidebar-content">
+                <div id="file-tree" class="tab-content active">
+                    <ul class="file-tree" id="fileTreeList">
+                        <!-- 动态生成 -->
+                    </ul>
+                </div>
+
+                <div id="page-outline" class="tab-content">
+                    <ul class="page-outline" id="outlineList">
+                        <!-- 动态生成 -->
+                    </ul>
+                </div>
             </div>
-            
-            <!-- 大纲内容 -->
-            <div id="page-outline" class="tab-content">
-                <ul class="page-outline">
-                    <!-- 动态生成大纲 -->
-                </ul>
-            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="content-wrapper" id="contentWrapper">
+            <div class="markdown-section"></div>
         </div>
     </script>
 
     <script>
+        // ===== 配置 =====
         window.$docsify = {
-            name: '📚 我的文档',
+            name: '📚 我的知识库',
             repo: '',
-            loadSidebar: false, // 禁用默认侧边栏
+            loadSidebar: false,
             auto2top: true,
-            maxLevel: 6, // 最大标题级别
-            subMaxLevel: 3,
+            maxLevel: 6,
             
             // 搜索配置
             search: {
                 paths: 'auto',
-                placeholder: '🔍 搜索文档...',
+                placeholder: '搜索文档...',
                 noData: '未找到相关内容',
                 depth: 4
             },
             
-            // 插件配置
+            // 插件
             plugins: [
-                // 自定义侧边栏插件
                 function(hook, vm) {
-                    // 初始化完成后添加侧边栏
+                    // 初始化
                     hook.mounted(function() {
-                        // 创建侧边栏容器
-                        const sidebar = document.createElement('aside');
-                        sidebar.className = 'sidebar';
-                        sidebar.style.width = '300px';
-                        sidebar.innerHTML = document.getElementById('custom-sidebar').innerHTML;
-                        
-                        // 插入到页面中
-                        const app = document.querySelector('#app');
-                        const content = document.createElement('div');
-                        content.className = 'content';
-                        content.style.marginLeft = '300px';
-                        content.style.padding = '20px';
-                        content.style.maxWidth = '900px';
-                        
-                        // 移动原有内容
-                        const originalContent = app.innerHTML;
-                        content.innerHTML = originalContent;
-                        app.innerHTML = '';
-                        app.appendChild(sidebar);
-                        app.appendChild(content);
-                        
-                        // 初始化文件树
-                        initFileTree();
-                        
-                        // 初始化标签页切换
-                        initTabSwitcher();
+                        initCustomLayout();
                     });
                     
-                    // 每次页面更新后刷新大纲
+                    // 页面加载完成
                     hook.doneEach(function() {
                         updatePageOutline();
-                        highlightCurrentFile();
+                        highlightCurrentPage();
+                        updateBadgeCounts();
                     });
                 }
             ]
         };
-        
-        // 初始化标签页切换
+
+        // ===== 数据定义 =====
+        // 完整的文档结构数据
+        const documentationStructure = {
+            name: "学习笔记",
+            type: "folder",
+            expanded: true,
+            children: [
+                {
+                    name: "判断推理",
+                    type: "folder",
+                    expanded: true,
+                    icon: "fas fa-brain",
+                    color: "#1890ff",
+                    children: [
+                        {
+                            name: "归因论证",
+                            type: "folder",
+                            expanded: true,
+                            children: [
+                                {
+                                    name: "一般归因.md",
+                                    type: "file",
+                                    path: "#/判断推理/一般归因",
+                                    status: "new",
+                                    level: 3
+                                },
+                                {
+                                    name: "对比实验归因.md",
+                                    type: "file", 
+                                    path: "#/判断推理/对比实验归因",
+                                    status: "modified",
+                                    level: 3
+                                },
+                                {
+                                    name: "时间对比归因.md",
+                                    type: "file",
+                                    path: "#/判断推理/时间对比归因",
+                                    level: 3
+                                }
+                            ]
+                        },
+                        {
+                            name: "图形推理",
+                            type: "folder",
+                            expanded: false,
+                            children: [
+                                {
+                                    name: "定性分析.md",
+                                    type: "file",
+                                    path: "#/判断推理/图形推理/定性分析",
+                                    level: 3,
+                                    description: "屈臣氏整奇偶风"
+                                },
+                                {
+                                    name: "定量分析.md",
+                                    type: "file",
+                                    path: "#/判断推理/图形推理/定量分析",
+                                    level: 3
+                                }
+                            ]
+                        },
+                        {
+                            name: "定义判断.md",
+                            type: "file",
+                            path: "#/判断推理/定义判断",
+                            level: 2
+                        },
+                        {
+                            name: "类比推理.md",
+                            type: "file",
+                            path: "#/判断推理/类比推理",
+                            level: 2
+                        }
+                    ]
+                },
+                {
+                    name: "言语理解",
+                    type: "folder",
+                    expanded: false,
+                    icon: "fas fa-language",
+                    color: "#52c41a",
+                    children: [
+                        {
+                            name: "片段阅读.md",
+                            type: "file",
+                            path: "#/言语理解/片段阅读",
+                            level: 2
+                        },
+                        {
+                            name: "逻辑填空.md",
+                            type: "file",
+                            path: "#/言语理解/逻辑填空",
+                            level: 2
+                        }
+                    ]
+                },
+                {
+                    name: "资料分析",
+                    type: "folder",
+                    expanded: false,
+                    icon: "fas fa-chart-bar",
+                    color: "#fa8c16",
+                    children: [
+                        {
+                            name: "速算技巧.md",
+                            type: "file",
+                            path: "#/资料分析/速算技巧",
+                            level: 2
+                        },
+                        {
+                            name: "公式大全.md",
+                            type: "file",
+                            path: "#/资料分析/公式大全",
+                            level: 2
+                        }
+                    ]
+                },
+                {
+                    name: "常用模板",
+                    type: "folder",
+                    expanded: false,
+                    icon: "fas fa-clipboard-list",
+                    color: "#722ed1",
+                    children: [
+                        {
+                            name: "答题模板.md",
+                            type: "file",
+                            path: "#/常用模板/答题模板",
+                            level: 2
+                        },
+                        {
+                            name: "笔记模板.md",
+                            type: "file",
+                            path: "#/常用模板/笔记模板",
+                            level: 2
+                        }
+                    ]
+                },
+                {
+                    name: "README.md",
+                    type: "file",
+                    path: "#/",
+                    level: 1,
+                    icon: "fas fa-home"
+                }
+            ]
+        };
+
+        // ===== 核心功能 =====
+        function initCustomLayout() {
+            const app = document.querySelector('#app');
+            app.innerHTML = document.getElementById('custom-sidebar').innerHTML;
+            
+            // 初始化功能
+            initTabSwitcher();
+            initFileTree();
+            initMobileToggle();
+            initScrollSpy();
+        }
+
+        // 标签页切换
         function initTabSwitcher() {
-            const tabs = document.querySelectorAll('.sidebar-tab');
-            tabs.forEach(tab => {
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
-                    // 移除所有激活状态
+                    // 更新标签状态
                     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    
-                    // 激活当前标签
                     this.classList.add('active');
-                    const tabId = this.getAttribute('data-tab');
+                    
+                    // 显示对应内容
+                    const tabId = this.dataset.tab;
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
                     document.getElementById(tabId).classList.add('active');
                 });
             });
         }
-        
-        // 初始化文件树
+
+        // 文件树初始化
         function initFileTree() {
-            const fileTree = document.querySelector('.file-tree');
+            const fileTreeList = document.getElementById('fileTreeList');
+            fileTreeList.innerHTML = generateTreeHTML(documentationStructure);
             
-            // 模拟文档结构 - 你可以根据实际情况修改
-            const treeData = [
-                {
-                    name: 'docs',
-                    type: 'folder',
-                    children: [
-                        {
-                            name: '判断推理',
-                            type: 'folder',
-                            children: [
-                                { name: '一般归因.md', type: 'file', path: '#/判断推理/一般归因' },
-                                { name: '对比实验归因.md', type: 'file', path: '#/判断推理/对比实验归因' },
-                                { name: '时间对比归因.md', type: 'file', path: '#/判断推理/时间对比归因' }
-                            ]
-                        },
-                        { name: '定义判断.md', type: 'file', path: '#/定义判断' },
-                        { name: '类比推理.md', type: 'file', path: '#/类比推理' },
-                        { name: '图形推理.md', type: 'file', path: '#/图形推理' },
-                        { name: '平面图推.md', type: 'file', path: '#/平面图推' }
-                    ]
-                },
-                { name: 'README.md', type: 'file', path: '#/' }
-            ];
-            
-            // 生成文件树HTML
-            fileTree.innerHTML = generateFileTreeHTML(treeData);
-            
-            // 添加文件夹折叠功能
-            document.querySelectorAll('.folder.collapsible').forEach(folder => {
+            // 添加文件夹点击事件
+            fileTreeList.querySelectorAll('.folder').forEach(folder => {
                 folder.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'A') return; // 点击链接不折叠
-                    this.classList.toggle('collapsed');
+                    if (e.target.closest('a')) return;
+                    
+                    const item = this.closest('.tree-item');
+                    const folderId = item.dataset.id;
+                    toggleFolder(folderId);
                 });
             });
             
             // 添加文件点击事件
-            document.querySelectorAll('.file-tree a').forEach(link => {
+            fileTreeList.querySelectorAll('.tree-item[data-type="file"] a').forEach(link => {
                 link.addEventListener('click', function(e) {
-                    // 更新当前活动文件
-                    document.querySelectorAll('.file-tree li.active').forEach(li => {
-                        li.classList.remove('active');
-                    });
-                    this.parentElement.classList.add('active');
+                    highlightFileTreeItem(this.closest('.tree-item'));
                 });
             });
-        }
-        
-        // 生成文件树HTML
-        function generateFileTreeHTML(items, level = 0) {
-            let html = '';
             
-            items.forEach(item => {
-                if (item.type === 'folder') {
-                    html += `
-                        <li>
-                            <div class="folder collapsible ${level === 0 ? '' : 'collapsed'}">
-                                ${item.name}
-                            </div>
-                            <ul>
-                                ${generateFileTreeHTML(item.children || [], level + 1)}
-                            </ul>
-                        </li>
-                    `;
-                } else if (item.type === 'file') {
-                    html += `
-                        <li class="file">
-                            <a href="${item.path}">${item.name}</a>
-                        </li>
-                    `;
+            // 初始高亮
+            highlightFileTreeItem();
+        }
+
+        // 生成树HTML
+        function generateTreeHTML(node, level = 0) {
+            if (!node.children) {
+                return '';
+            }
+            
+            let html = '';
+            node.children.forEach(child => {
+                const isFolder = child.type === 'folder';
+                const isExpanded = child.expanded || false;
+                const childLevel = level + 1;
+                
+                // 树项HTML
+                html += `
+                    <li>
+                        <div class="tree-item ${isFolder ? 'folder' : ''} level-${Math.min(child.level || childLevel, 4)} ${isFolder && !isExpanded ? 'collapsed' : ''}"
+                             data-id="${child.name}"
+                             data-type="${child.type}"
+                             data-level="${childLevel}">
+                            <span class="tree-icon">
+                                ${getTreeIcon(child)}
+                            </span>
+                            <span class="tree-content">
+                                ${child.name}
+                                ${child.description ? `<small style="color: #8c8c8c; margin-left: 8px;">${child.description}</small>` : ''}
+                            </span>
+                            ${getStatusDot(child.status)}
+                            ${isFolder ? '<span class="tree-arrow"><i class="fas fa-chevron-down"></i></span>' : ''}
+                        </div>
+                `;
+                
+                // 子项（如果是文件夹且展开）
+                if (isFolder && child.children && child.children.length > 0) {
+                    html += `<ul style="${isExpanded ? '' : 'display: none;'}">`;
+                    html += generateTreeHTML(child, childLevel);
+                    html += '</ul>';
                 }
+                
+                html += '</li>';
             });
             
             return html;
         }
-        
+
+        // 获取树图标
+        function getTreeIcon(item) {
+            if (item.icon) {
+                return `<i class="${item.icon}" style="${item.color ? `color: ${item.color};` : ''}"></i>`;
+            }
+            
+            if (item.type === 'folder') {
+                return '<i class="fas fa-folder"></i>';
+            } else {
+                const ext = item.name.split('.').pop();
+                const icons = {
+                    'md': 'fas fa-file-alt',
+                    'js': 'fas fa-file-code',
+                    'json': 'fas fa-file-code',
+                    'html': 'fas fa-file-code',
+                    'css': 'fas fa-file-code',
+                    'pdf': 'fas fa-file-pdf',
+                    'zip': 'fas fa-file-archive'
+                };
+                return `<i class="${icons[ext] || 'fas fa-file'}"></i>`;
+            }
+        }
+
+        // 获取状态点
+        function getStatusDot(status) {
+            if (!status) return '';
+            
+            const statusClasses = {
+                new: 'status-dot new',
+                modified: 'status-dot modified',
+                locked: 'status-dot locked'
+            };
+            
+            return `<span class="${statusClasses[status] || ''}" title="${status}"></span>`;
+        }
+
+        // 切换文件夹展开/折叠
+        function toggleFolder(folderId) {
+            const folderItem = document.querySelector(`.tree-item[data-id="${folderId}"]`);
+            if (!folderItem || !folderItem.classList.contains('folder')) return;
+            
+            const isCollapsed = folderItem.classList.contains('collapsed');
+            const childList = folderItem.nextElementSibling;
+            
+            if (!childList || childList.tagName !== 'UL') return;
+            
+            // 切换状态
+            folderItem.classList.toggle('collapsed');
+            
+            // 动画展开/折叠
+            if (isCollapsed) {
+                childList.style.display = 'block';
+                const height = childList.scrollHeight;
+                childList.style.maxHeight = '0';
+                setTimeout(() => {
+                    childList.style.maxHeight = height + 'px';
+                    setTimeout(() => {
+                        childList.style.maxHeight = 'none';
+                    }, 300);
+                }, 10);
+            } else {
+                childList.style.maxHeight = childList.scrollHeight + 'px';
+                setTimeout(() => {
+                    childList.style.maxHeight = '0';
+                    setTimeout(() => {
+                        childList.style.display = 'none';
+                    }, 300);
+                }, 10);
+            }
+            
+            // 更新数据
+            updateFolderState(folderId, !isCollapsed);
+        }
+
+        // 更新文件夹状态
+        function updateFolderState(folderId, isCollapsed) {
+            function updateNode(node) {
+                if (node.name === folderId) {
+                    node.expanded = !isCollapsed;
+                }
+                if (node.children) {
+                    node.children.forEach(updateNode);
+                }
+            }
+            updateNode(documentationStructure);
+        }
+
+        // 高亮文件树项
+        function highlightFileTreeItem(activeItem = null) {
+            // 清除所有高亮
+            document.querySelectorAll('.tree-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 如果没有指定，查找当前页面
+            if (!activeItem) {
+                const currentPath = window.location.hash || '#/';
+                activeItem = document.querySelector(`.tree-item[data-type="file"] a[href="${currentPath}"]`);
+                if (activeItem) {
+                    activeItem = activeItem.closest('.tree-item');
+                }
+            }
+            
+            // 高亮当前项
+            if (activeItem) {
+                activeItem.classList.add('active');
+                
+                // 确保所有父级都展开
+                let parent = activeItem.parentElement;
+                while (parent && parent.tagName === 'UL') {
+                    const folderItem = parent.previousElementSibling;
+                    if (folderItem && folderItem.classList.contains('folder')) {
+                        if (folderItem.classList.contains('collapsed')) {
+                            folderItem.classList.remove('collapsed');
+                            parent.style.display = 'block';
+                        }
+                    }
+                    parent = parent.parentElement;
+                }
+            }
+        }
+
         // 更新页面大纲
         function updatePageOutline() {
-            const outlineContainer = document.querySelector('.page-outline');
-            const headings = document.querySelectorAll('.markdown-section h1, .markdown-section h2, .markdown-section h3, .markdown-section h4, .markdown-section h5, .markdown-section h6');
+            const outlineList = document.getElementById('outlineList');
+            const headings = document.querySelectorAll('.markdown-section h1, .markdown-section h2, .markdown-section h3, .markdown-section h4');
             
             if (headings.length === 0) {
-                outlineContainer.innerHTML = '<li style="color: #999; padding: 10px;">此页面没有标题</li>';
+                outlineList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <p>当前页面没有标题</p>
+                    </div>
+                `;
                 return;
             }
             
-            let outlineHTML = '';
-            
+            let html = '';
             headings.forEach((heading, index) => {
                 const level = parseInt(heading.tagName.substring(1));
                 const text = heading.textContent;
                 const id = heading.id || `heading-${index}`;
                 
-                // 如果没有id，给heading添加一个
-                if (!heading.id) {
-                    heading.id = id;
-                }
+                if (!heading.id) heading.id = id;
                 
-                outlineHTML += `
-                    <li class="outline-h${level}">
-                        <a href="#${id}">${text}</a>
+                const icons = ['fas fa-h1', 'fas fa-h2', 'fas fa-h3', 'fas fa-h4'];
+                
+                html += `
+                    <li>
+                        <a href="#${id}" class="outline-item outline-h${level}" data-level="${level}">
+                            <span class="outline-icon">
+                                <i class="${icons[level-1] || 'fas fa-hashtag'}"></i>
+                            </span>
+                            <span class="outline-content">${text}</span>
+                        </a>
                     </li>
                 `;
             });
             
-            outlineContainer.innerHTML = outlineHTML;
+            outlineList.innerHTML = html;
             
             // 添加大纲点击事件
-            document.querySelectorAll('.page-outline a').forEach(link => {
-                link.addEventListener('click', function(e) {
+            outlineList.querySelectorAll('.outline-item').forEach(item => {
+                item.addEventListener('click', function(e) {
                     e.preventDefault();
                     const targetId = this.getAttribute('href').substring(1);
-                    const targetElement = document.getElementById(targetId);
+                    const target = document.getElementById(targetId);
                     
-                    if (targetElement) {
-                        // 滚动到目标位置
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 80,
-                            behavior: 'smooth'
-                        });
+                    if (target) {
+                        // 平滑滚动
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         
-                        // 高亮当前大纲项
-                        document.querySelectorAll('.page-outline li.active').forEach(li => {
-                            li.classList.remove('active');
-                        });
-                        this.parentElement.classList.add('active');
+                        // 高亮
+                        document.querySelectorAll('.outline-item').forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
                     }
                 });
             });
         }
-        
-        // 高亮当前文件
-        function highlightCurrentFile() {
-            const currentPath = window.location.hash;
-            document.querySelectorAll('.file-tree a').forEach(link => {
-                link.parentElement.classList.remove('active');
-                if (link.getAttribute('href') === currentPath || 
-                    (currentPath === '#/' && link.getAttribute('href') === '#/')) {
-                    link.parentElement.classList.add('active');
-                    
-                    // 展开父级文件夹
-                    let parent = link.parentElement;
-                    while (parent) {
-                        const folder = parent.querySelector('.folder.collapsible');
-                        if (folder && folder.classList.contains('collapsed')) {
-                            folder.classList.remove('collapsed');
-                        }
-                        parent = parent.parentElement.closest('li');
-                    }
-                }
-            });
-        }
-        
-        // 监听页面滚动，更新大纲高亮
+
+        // 初始化滚动监听
         function initScrollSpy() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const id = entry.target.id;
-                        document.querySelectorAll('.page-outline li.active').forEach(li => {
-                            li.classList.remove('active');
+                        document.querySelectorAll('.outline-item').forEach(item => {
+                            item.classList.remove('active');
                         });
-                        const correspondingLink = document.querySelector(`.page-outline a[href="#${id}"]`);
-                        if (correspondingLink) {
-                            correspondingLink.parentElement.classList.add('active');
+                        
+                        const activeOutline = document.querySelector(`.outline-item[href="#${id}"]`);
+                        if (activeOutline) {
+                            activeOutline.classList.add('active');
                         }
                     }
                 });
             }, {
-                rootMargin: '-80px 0px -80% 0px',
-                threshold: 0
+                rootMargin: '-100px 0px -50% 0px',
+                threshold: 0.1
             });
             
             // 观察所有标题
-            document.querySelectorAll('.markdown-section h1, .markdown-section h2, .markdown-section h3').forEach(heading => {
+            document.querySelectorAll('h1, h2, h3').forEach(heading => {
                 observer.observe(heading);
             });
         }
-        
-        // 页面加载完成后初始化滚动监听
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initScrollSpy, 1000);
+
+        // 移动端切换
+        function initMobileToggle() {
+            const toggleBtn = document.getElementById('mobileToggle');
+            const sidebar = document.querySelector('.sidebar-container');
+            
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+            });
+            
+            // 点击内容区关闭侧边栏
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    !sidebar.contains(e.target) && 
+                    !toggleBtn.contains(e.target) &&
+                    sidebar.classList.contains('show')) {
+                    sidebar.classList.remove('show');
+                }
+            });
+        }
+
+        // 更新徽章计数
+        function updateBadgeCounts() {
+            // 文件计数
+            const fileCount = countFiles(documentationStructure);
+            document.getElementById('file-count').textContent = fileCount;
+            
+            // 大纲计数
+            const headingCount = document.querySelectorAll('h1, h2, h3').length;
+            document.getElementById('heading-count').textContent = headingCount;
+        }
+
+        // 统计文件数量
+        function countFiles(node) {
+            if (!node.children) return 0;
+            
+            let count = 0;
+            node.children.forEach(child => {
+                if (child.type === 'file') {
+                    count++;
+                } else if (child.children) {
+                    count += countFiles(child);
+                }
+            });
+            return count;
+        }
+
+        // 高亮当前页面
+        function highlightCurrentPage() {
+            highlightFileTreeItem();
+        }
+
+        // 初始加载
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                highlightCurrentPage();
+                updateBadgeCounts();
+            }, 100);
+        });
+
+        // 监听hash变化
+        window.addEventListener('hashchange', function() {
+            setTimeout(() => {
+                highlightCurrentPage();
+                updatePageOutline();
+            }, 100);
         });
     </script>
-    
-    <!-- Docsify核心库 -->
+
+    <!-- Docsify核心 -->
     <script src="https://cdn.jsdelivr.net/npm/docsify@4"></script>
-    
-    <!-- 搜索插件 -->
     <script src="https://cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
     
-    <!-- 代码高亮 -->
+    <!-- Prism代码高亮 -->
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
 </body>
 </html>
