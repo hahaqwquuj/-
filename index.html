@@ -82,6 +82,22 @@
         noData: '未找到结果',
         depth: 6
       },
+
+  // 侧边栏配置
+  loadSidebar: true,
+  subMaxLevel: 6,  // 最大支持4级嵌套
+  sidebarDisplayLevel: 1,  // 默认展开1级
+ // 折叠插件配置
+  sidebarFold: {
+    collapse: true,  // 启用折叠
+    level: 1,        // 默认折叠级别
+    arrow: '▶',      // 折叠箭头
+    arrowOpen: '▼'   // 展开箭头
+  },
+  // 添加别名配置，让导航更清晰
+  alias: {
+    '/.*/_sidebar.md': '/_sidebar.md'
+  },
       plugins: [
         function(hook, vm) {
           hook.beforeEach(function(content) {
@@ -122,5 +138,16 @@
   
   <!-- 页面进度条 -->
   <script src="//cdn.jsdelivr.net/npm/docsify-progress@latest/dist/progress.min.js"></script>
+  <!-- 在原有的script后面添加这些 -->
+
+<!-- 1. 侧边栏折叠插件 -->
+<script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar.min.js"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar.min.css">
+
+<!-- 2. 增强的侧边栏插件（支持多级嵌套） -->
+<script src="//cdn.jsdelivr.net/npm/docsify-sidebar-fold/dist/docsify-sidebar-fold.min.js"></script>
+
+<!-- 3. 侧边栏显示插件 -->
+<script src="//cdn.jsdelivr.net/npm/docsify-sidebar"></script>
 </body>
 </html>
