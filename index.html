@@ -2,14 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>智能文档阅读器</title>
+    <title>文档阅读器</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- 代码高亮 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
     
     <style>
         /* ===== 基础样式 ===== */
@@ -23,10 +18,8 @@
             --text-primary: #24292f;
             --text-secondary: #57606a;
             --text-muted: #6e7781;
-            --sidebar-width: 300px;
+            --sidebar-width: 280px;
             --radius: 6px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.12);
-            --transition: all 0.3s ease;
         }
         
         @media (prefers-color-scheme: dark) {
@@ -42,38 +35,19 @@
             }
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            transition: var(--transition);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); }
         
         /* ===== 布局 ===== */
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
+        .app-container { display: flex; min-height: 100vh; }
         
         /* ===== 侧边栏 ===== */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--bg-secondary);
             border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
             position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
+            top: 0; left: 0; bottom: 0;
             z-index: 100;
             overflow: hidden;
         }
@@ -90,20 +64,38 @@
             gap: 10px;
             font-size: 16px;
             font-weight: 600;
-            color: var(--text-primary);
         }
         
-        .sidebar-title i {
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+        
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .sidebar-tab.active {
             color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--bg-secondary);
         }
         
         .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
             padding: 16px 0;
+            overflow-y: auto;
+            height: calc(100vh - 120px);
         }
         
-        /* ===== 文件树样式 ===== */
+        /* ===== 文件树 ===== */
         .file-tree {
             list-style: none;
             padding: 0;
@@ -114,8 +106,8 @@
             list-style: none;
             padding-left: 0;
             margin: 0;
-            overflow: hidden;
             max-height: 0;
+            overflow: hidden;
             transition: max-height 0.3s ease;
         }
         
@@ -123,19 +115,13 @@
             max-height: 2000px;
         }
         
-        .tree-node {
-            position: relative;
-        }
-        
         .tree-item {
             display: flex;
             align-items: center;
-            padding: 6px 20px;
+            padding: 8px 20px;
             cursor: pointer;
-            transition: var(--transition);
             color: var(--text-secondary);
             text-decoration: none;
-            user-select: none;
         }
         
         .tree-item:hover {
@@ -154,119 +140,9 @@
             font-weight: 500;
         }
         
-        .tree-item.folder.collapsed .folder-icon i:last-child {
-            transform: rotate(-90deg);
-        }
-        
         .tree-icon {
             width: 20px;
             margin-right: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .tree-item .tree-text {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        /* 层级缩进 */
-        .tree-item[data-level="0"] { padding-left: 20px; }
-        .tree-item[data-level="1"] { padding-left: 36px; font-size: 15px; }
-        .tree-item[data-level="2"] { padding-left: 52px; font-size: 14px; color: var(--text-muted); }
-        .tree-item[data-level="3"] { padding-left: 68px; font-size: 13px; color: var(--text-muted); }
-        
-        /* ===== 大纲样式 ===== */
-        .outline-container {
-            display: none;
-            padding: 16px 20px;
-        }
-        
-        .outline-container.active {
-            display: block;
-        }
-        
-        .outline-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .outline-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .outline-item {
-            margin-bottom: 4px;
-        }
-        
-        .outline-item a {
-            display: block;
-            padding: 4px 0 4px 12px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: var(--transition);
-            border-left: 2px solid transparent;
-        }
-        
-        .outline-item a:hover {
-            color: var(--primary);
-            border-left-color: var(--primary);
-        }
-        
-        .outline-item.active a {
-            color: var(--primary);
-            font-weight: 500;
-            border-left-color: var(--primary);
-            background: rgba(9, 105, 218, 0.05);
-        }
-        
-        /* 大纲层级 */
-        .outline-h1 { padding-left: 0px; font-size: 15px; font-weight: 600; }
-        .outline-h2 { padding-left: 12px; font-size: 14px; }
-        .outline-h3 { padding-left: 24px; font-size: 13px; color: var(--text-muted); }
-        .outline-h4 { padding-left: 36px; font-size: 12px; color: var(--text-muted); }
-        
-        /* ===== 标签页 ===== */
-        .sidebar-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-tertiary);
-        }
-        
-        .sidebar-tab {
-            flex: 1;
-            padding: 12px;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: var(--transition);
-        }
-        
-        .sidebar-tab:hover {
-            color: var(--text-primary);
-        }
-        
-        .sidebar-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-            background: var(--bg-secondary);
         }
         
         /* ===== 主内容区 ===== */
@@ -275,7 +151,6 @@
             margin-left: var(--sidebar-width);
             padding: 40px 48px;
             max-width: 900px;
-            min-width: 0;
         }
         
         .content-header {
@@ -288,118 +163,16 @@
             font-size: 32px;
             font-weight: 800;
             margin-bottom: 8px;
-            color: var(--text-primary);
         }
         
-        .content-subtitle {
-            font-size: 18px;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-        
-        /* Markdown 内容样式 */
-        .markdown-body {
-            font-size: 16px;
-            line-height: 1.7;
-        }
-        
-        .markdown-body h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 48px 0 24px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .markdown-body h2 {
-            font-size: 24px;
-            font-weight: 600;
-            margin: 40px 0 20px;
-        }
-        
-        .markdown-body h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 32px 0 16px;
-        }
-        
-        .markdown-body h4 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 24px 0 12px;
-        }
-        
-        .markdown-body p {
-            margin-bottom: 20px;
-        }
-        
-        .markdown-body ul, .markdown-body ol {
-            margin-bottom: 20px;
-            padding-left: 32px;
-        }
-        
-        .markdown-body li {
-            margin-bottom: 8px;
-        }
-        
-        .markdown-body code {
-            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-            font-size: 14px;
-            padding: 2px 6px;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            color: var(--primary);
-        }
-        
-        .markdown-body pre {
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            padding: 16px;
-            margin: 20px 0;
-            overflow-x: auto;
-            border: 1px solid var(--border);
-        }
-        
-        .markdown-body pre code {
-            background: none;
-            padding: 0;
-            color: inherit;
-        }
-        
-        .markdown-body blockquote {
-            border-left: 4px solid var(--primary);
-            padding: 12px 20px;
-            margin: 20px 0;
-            background: var(--bg-tertiary);
-            border-radius: 0 8px 8px 0;
-            color: var(--text-secondary);
-        }
-        
-        .markdown-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .markdown-body th {
-            background: var(--bg-tertiary);
-            font-weight: 600;
-            text-align: left;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .markdown-body td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .markdown-body tr:last-child td {
-            border-bottom: none;
-        }
+        /* ===== Markdown 样式 ===== */
+        .markdown-body h1 { font-size: 28px; margin: 40px 0 20px; }
+        .markdown-body h2 { font-size: 24px; margin: 32px 0 16px; }
+        .markdown-body h3 { font-size: 20px; margin: 24px 0 12px; }
+        .markdown-body p { margin-bottom: 16px; line-height: 1.6; }
+        .markdown-body ul, .markdown-body ol { margin-bottom: 16px; padding-left: 24px; }
+        .markdown-body code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; }
+        .markdown-body pre { background: var(--bg-tertiary); padding: 16px; border-radius: 8px; margin: 16px 0; overflow-x: auto; }
         
         /* ===== 加载状态 ===== */
         .loading {
@@ -408,81 +181,33 @@
             color: var(--text-muted);
         }
         
-        .loading i {
-            font-size: 32px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-        
-        .loading p {
-            font-size: 14px;
-        }
-        
-        /* ===== 移动端适配 ===== */
-        @media (max-width: 1024px) {
-            .main-content {
-                padding: 32px;
-                max-width: 100%;
-            }
-        }
-        
+        /* ===== 移动端 ===== */
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: 280px;
-                box-shadow: 2px 0 20px rgba(0,0,0,0.1);
-            }
-            
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-                padding: 24px;
-            }
-            
-            .mobile-toggle {
-                display: flex !important;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 24px; }
+            .mobile-toggle { display: block !important; }
         }
         
         .mobile-toggle {
             display: none;
             position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 99;
+            top: 16px; left: 16px;
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            align-items: center;
-            justify-content: center;
+            border-radius: 4px;
+            padding: 8px 12px;
             cursor: pointer;
-            box-shadow: var(--shadow);
-        }
-        
-        /* ===== 动画 ===== */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.3s ease;
+            z-index: 99;
         }
     </style>
 </head>
 <body>
-    <!-- 移动端切换按钮 -->
-    <button class="mobile-toggle" id="mobileToggle" aria-label="切换侧边栏">
-        <i class="fas fa-bars"></i>
+    <button class="mobile-toggle" id="mobileToggle">
+        <i class="fas fa-bars"></i> 菜单
     </button>
     
-    <!-- 主应用容器 -->
     <div class="app-container">
         <!-- 侧边栏 -->
         <aside class="sidebar" id="sidebar">
@@ -493,42 +218,30 @@
                 </div>
             </div>
             
-            <!-- 标签页 -->
             <div class="sidebar-tabs">
                 <button class="sidebar-tab active" data-tab="files">
                     <i class="fas fa-folder"></i>
-                    <span>文件</span>
-                </button>
-                <button class="sidebar-tab" data-tab="outline">
-                    <i class="fas fa-list"></i>
-                    <span>大纲</span>
+                    文件
                 </button>
             </div>
             
-            <!-- 侧边栏内容 -->
             <div class="sidebar-content">
-                <!-- 文件树 -->
-                <ul class="file-tree" id="fileTree"></ul>
-                
-                <!-- 大纲 -->
-                <div class="outline-container" id="outlineContainer">
-                    <div class="outline-title">页面大纲</div>
-                    <ul class="outline-list" id="outlineList"></ul>
-                </div>
+                <ul class="file-tree" id="fileTree">
+                    <!-- 动态生成 -->
+                </ul>
             </div>
         </aside>
         
-        <!-- 主内容区域 -->
+        <!-- 主内容 -->
         <main class="main-content" id="mainContent">
             <div class="content-header">
                 <h1 class="content-title" id="pageTitle">文档阅读器</h1>
-                <p class="content-subtitle" id="pageSubtitle">自动加载并显示您的文档</p>
             </div>
             
             <div id="contentContainer">
                 <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i>
-                    <p>正在加载文档...</p>
+                    <p>正在加载...</p>
                 </div>
             </div>
         </main>
@@ -537,243 +250,115 @@
     <script>
         // ===== 配置 =====
         const CONFIG = {
-            // 仓库信息（自动从当前页面获取）
-            repoOwner: window.location.hostname.split('.')[0] || 'GSL-Web',
-            repoName: window.location.pathname.split('/')[1] || '-',
-            branch: 'main',
+            // 修复：直接从当前页面获取正确的路径
+            baseUrl: window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, ''),
             
-            // GitHub API 配置
-            useApi: true,
-            apiBase: 'https://api.github.com/repos',
+            // 预定义的文件结构（根据您的仓库）
+            knownFiles: [
+                'README.md',
+                '判断推理/一般归因.md',
+                '判断推理/对比实验归因.md',
+                '判断推理/时间对比归因.md',
+                '言语理解/片段阅读.md',
+                '言语理解/逻辑填空.md',
+                '言语理解/词语理解.md',
+                '言语理解/句子理解.md',
+                '言语理解/篇章理解.md',
+                '数量关系/速算技巧.md',
+                '数量关系/公式大全.md',
+                '数量关系/题型分类.md',
+                '数量关系/解题技巧.md'
+            ],
             
-            // 本地开发时使用相对路径
-            isLocal: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            // 使用简单模式（避免复杂的API调用）
+            simpleMode: true
         };
-        
+
         // ===== 状态管理 =====
         const state = {
-            currentFile: null,
-            currentPath: null,
-            fileTree: null,
+            currentFile: 'README.md',
             collapsedFolders: new Set(),
-            activeTab: 'files'
+            fileTree: null
         };
-        
+
         // ===== 核心功能 =====
         
         // 1. 初始化应用
         async function initApp() {
-            try {
-                // 显示加载状态
-                showLoading('正在扫描仓库结构...');
-                
-                // 获取仓库文件结构
-                await loadRepositoryStructure();
-                
-                // 绑定事件
-                bindEvents();
-                
-                // 加载初始文档
-                await loadInitialDocument();
-                
-                // 隐藏加载状态
-                hideLoading();
-                
-            } catch (error) {
-                console.error('初始化失败:', error);
-                showError('无法加载仓库内容，请检查控制台查看详情。');
-            }
-        }
-        
-        // 2. 加载仓库结构
-        async function loadRepositoryStructure() {
-            if (CONFIG.isLocal) {
-                // 本地开发模式：使用 fetch API 扫描目录
-                await scanLocalRepository();
-            } else if (CONFIG.useApi) {
-                // GitHub Pages 模式：使用 GitHub API
-                await loadFromGitHubApi();
-            } else {
-                // 备用方案：尝试直接访问文件
-                await scanRepositoryFiles();
-            }
+            console.log('正在初始化应用...');
             
-            // 渲染文件树
-            renderFileTree();
-        }
-        
-        // 3. 从 GitHub API 加载
-        async function loadFromGitHubApi() {
-            const apiUrl = `${CONFIG.apiBase}/${CONFIG.repoOwner}/${CONFIG.repoName}/git/trees/${CONFIG.branch}?recursive=1`;
+            // 绑定事件
+            bindEvents();
             
-            try {
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`GitHub API 错误: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                // 构建文件树
-                const tree = {
-                    name: 'root',
-                    type: 'folder',
-                    path: '',
-                    children: []
-                };
-                
-                // 处理所有文件
-                data.tree.forEach(item => {
-                    // 只处理 .md 文件和目录
-                    if (item.type === 'blob' && item.path.endsWith('.md')) {
-                        addFileToTree(tree, item.path);
-                    } else if (item.type === 'tree') {
-                        // 添加空目录
-                        addFolderToTree(tree, item.path);
-                    }
-                });
-                
-                state.fileTree = tree;
-                
-            } catch (error) {
-                console.warn('GitHub API 加载失败，尝试备用方案:', error);
-                await scanRepositoryFiles();
-            }
-        }
-        
-        // 4. 扫描仓库文件（备用方案）
-        async function scanRepositoryFiles() {
-            // 尝试获取仓库文件列表
-            // 注意：GitHub Pages 默认不提供目录列表
-            // 这里我们尝试预定义的文件结构
+            // 构建文件树
+            buildFileTree();
             
+            // 加载初始文档
+            await loadDocument(state.currentFile);
+            
+            // 更新侧边栏
+            updateSidebar();
+        }
+
+        // 2. 构建文件树
+        function buildFileTree() {
             const tree = {
                 name: 'root',
                 type: 'folder',
                 path: '',
                 children: []
             };
-            
-            // 尝试加载已知的目录
-            const knownFolders = ['判断推理', '数量关系', '言语理解'];
-            
-            for (const folder of knownFolders) {
-                try {
-                    // 尝试访问文件夹下的 index.md 或 README.md
-                    const testUrl = `${folder}/README.md`;
-                    const response = await fetch(testUrl);
-                    
-                    if (response.ok) {
-                        addFileToTree(tree, testUrl);
-                    }
-                } catch (e) {
-                    // 文件夹可能不存在或没有读取权限
-                }
-            }
-            
-            // 总是包含根目录的 README.md
-            addFileToTree(tree, 'README.md');
-            
-            state.fileTree = tree;
-        }
-        
-        // 5. 本地开发扫描
-        async function scanLocalRepository() {
-            const tree = {
-                name: 'root',
-                type: 'folder',
-                path: '',
-                children: []
-            };
-            
-            // 尝试获取文件列表
-            // 注意：由于浏览器安全限制，我们不能直接读取目录
-            // 这里我们使用一个已知的文件列表
-            
-            const knownFiles = [
-                'README.md',
-                '判断推理/一般归因.md',
-                '判断推理/对比实验归因.md',
-                '数量关系/速算技巧.md',
-                '言语理解/片段阅读.md'
-            ];
-            
-            knownFiles.forEach(filePath => {
+
+            // 从预定义列表构建树
+            CONFIG.knownFiles.forEach(filePath => {
                 addFileToTree(tree, filePath);
             });
-            
+
             state.fileTree = tree;
+            renderFileTree();
         }
-        
-        // 6. 添加文件到树结构
+
+        // 3. 添加文件到树
         function addFileToTree(tree, filePath) {
             const parts = filePath.split('/');
             let current = tree;
-            
+
             for (let i = 0; i < parts.length; i++) {
                 const part = parts[i];
                 const isFile = i === parts.length - 1;
                 
+                if (!current.children) current.children = [];
+
                 if (isFile) {
                     // 添加文件
-                    if (!current.children) current.children = [];
-                    
                     const existing = current.children.find(c => c.name === part);
                     if (!existing) {
                         current.children.push({
                             name: part,
                             type: 'file',
                             path: filePath,
-                            fullPath: filePath
+                            displayName: part.replace('.md', '')
                         });
                     }
                 } else {
                     // 添加或查找文件夹
-                    if (!current.children) current.children = [];
-                    
                     let folder = current.children.find(c => c.name === part && c.type === 'folder');
                     if (!folder) {
                         folder = {
                             name: part,
                             type: 'folder',
                             path: parts.slice(0, i + 1).join('/'),
+                            displayName: part,
                             children: []
                         };
                         current.children.push(folder);
                     }
-                    
                     current = folder;
                 }
             }
         }
-        
-        // 7. 添加文件夹到树结构
-        function addFolderToTree(tree, folderPath) {
-            const parts = folderPath.split('/');
-            let current = tree;
-            
-            for (let i = 0; i < parts.length; i++) {
-                const part = parts[i];
-                
-                if (!current.children) current.children = [];
-                
-                let folder = current.children.find(c => c.name === part && c.type === 'folder');
-                if (!folder) {
-                    folder = {
-                        name: part,
-                        type: 'folder',
-                        path: folderPath,
-                        children: []
-                    };
-                    current.children.push(folder);
-                }
-                
-                current = folder;
-            }
-        }
-        
-        // 8. 渲染文件树
+
+        // 4. 渲染文件树
         function renderFileTree() {
             const fileTree = document.getElementById('fileTree');
             
@@ -781,36 +366,30 @@
                 fileTree.innerHTML = '<div class="loading"><p>暂无文档</p></div>';
                 return;
             }
-            
+
+            // 排序：文件夹在前，文件在后
+            state.fileTree.children.sort((a, b) => {
+                if (a.type === 'folder' && b.type === 'file') return -1;
+                if (a.type === 'file' && b.type === 'folder') return 1;
+                return a.displayName.localeCompare(b.displayName);
+            });
+
             fileTree.innerHTML = generateTreeHTML(state.fileTree, 0);
-            
-            // 恢复折叠状态
-            restoreFolderState();
-            
-            // 绑定文件夹点击事件
-            bindFolderEvents();
+            bindTreeEvents();
         }
-        
-        // 9. 生成树HTML
+
+        // 5. 生成树HTML
         function generateTreeHTML(node, level) {
             if (!node.children || node.children.length === 0) {
                 return '';
             }
-            
+
             let html = '';
-            
-            // 排序：文件夹在前，文件在后，按名称排序
-            const sortedChildren = [...node.children].sort((a, b) => {
-                if (a.type === 'folder' && b.type === 'file') return -1;
-                if (a.type === 'file' && b.type === 'folder') return 1;
-                return a.name.localeCompare(b.name);
-            });
-            
-            sortedChildren.forEach(child => {
+            node.children.forEach(child => {
                 const isFolder = child.type === 'folder';
                 const isCollapsed = state.collapsedFolders.has(child.path);
                 const isActive = state.currentFile === child.path;
-                
+
                 if (isFolder) {
                     html += `
                         <li class="tree-node">
@@ -818,10 +397,10 @@
                                  data-path="${child.path}"
                                  data-level="${level}"
                                  data-type="folder">
-                                <span class="tree-icon folder-icon">
+                                <span class="tree-icon">
                                     <i class="fas ${isCollapsed ? 'fa-folder' : 'fa-folder-open'}"></i>
                                 </span>
-                                <span class="tree-text">${child.name}</span>
+                                <span>${child.displayName}</span>
                             </div>
                             <ul class="${isCollapsed ? '' : 'expanded'}">
                                 ${generateTreeHTML(child, level + 1)}
@@ -829,10 +408,8 @@
                         </li>
                     `;
                 } else {
-                    // 只显示 .md 文件
+                    // 只显示.md文件
                     if (child.name.endsWith('.md')) {
-                        const fileName = child.name.replace('.md', '');
-                        
                         html += `
                             <li class="tree-node">
                                 <a class="tree-item ${isActive ? 'active' : ''}"
@@ -843,31 +420,30 @@
                                     <span class="tree-icon">
                                         <i class="fas fa-file-alt"></i>
                                     </span>
-                                    <span class="tree-text">${fileName}</span>
+                                    <span>${child.displayName}</span>
                                 </a>
                             </li>
                         `;
                     }
                 }
             });
-            
+
             return html;
         }
-        
-        // 10. 加载文档
+
+        // 6. 加载文档
         async function loadDocument(filePath) {
+            console.log('正在加载文档:', filePath);
+            
             try {
                 // 显示加载状态
-                showLoading('正在加载文档...');
+                showLoading();
                 
                 // 更新状态
                 state.currentFile = filePath;
-                state.currentPath = filePath;
-                
-                // 更新 URL
                 updateUrlHash(filePath);
                 
-                // 加载文件内容
+                // 获取文件内容
                 const content = await fetchFileContent(filePath);
                 
                 // 更新页面标题
@@ -876,28 +452,61 @@
                 // 渲染内容
                 renderContent(content);
                 
-                // 更新文件树激活状态
+                // 更新侧边栏激活状态
                 updateActiveFile();
-                
-                // 生成大纲
-                generateOutline(content);
                 
                 // 确保文件夹展开
                 ensureFolderExpanded(filePath);
                 
-                // 隐藏加载状态
-                hideLoading();
-                
             } catch (error) {
-                console.error('加载文档失败:', error);
+                console.error('加载失败:', error);
                 showError(`无法加载文档: ${filePath}`);
             }
         }
-        
-        // 11. 获取文件内容
+
+        // 7. 获取文件内容（修复版本）
         async function fetchFileContent(filePath) {
-            // 尝试使用相对路径加载
-            const response = await fetch(filePath);
+            console.log('尝试获取文件:', filePath);
+            
+            // 修复：使用正确的路径
+            let url;
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                // 本地开发
+                url = filePath;
+            } else {
+                // GitHub Pages
+                // 移除可能的重复路径
+                const basePath = window.location.pathname.replace(/\/[^\/]*$/, '');
+                url = basePath + '/' + filePath;
+                
+                // 清理URL中的双斜杠
+                url = url.replace(/([^:])\/\//g, '$1/');
+                
+                // 如果是根目录的README.md
+                if (filePath === 'README.md') {
+                    // 尝试几种可能的路径
+                    const possiblePaths = [
+                        'README.md',
+                        './README.md',
+                        window.location.pathname.replace(/\/[^\/]*$/, '') + '/README.md'
+                    ];
+                    
+                    for (const path of possiblePaths) {
+                        try {
+                            console.log('尝试路径:', path);
+                            const response = await fetch(path);
+                            if (response.ok) {
+                                return await response.text();
+                            }
+                        } catch (e) {
+                            continue;
+                        }
+                    }
+                }
+            }
+            
+            console.log('最终请求URL:', url);
+            const response = await fetch(url);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -905,94 +514,66 @@
             
             return await response.text();
         }
-        
-        // 12. 更新页面标题
+
+        // 8. 更新页面标题
         function updatePageTitle(filePath) {
             const titleElement = document.getElementById('pageTitle');
-            const subtitleElement = document.getElementById('pageSubtitle');
-            
             const fileName = filePath.split('/').pop().replace('.md', '');
             const folderName = filePath.includes('/') ? filePath.split('/')[0] : '';
             
             titleElement.textContent = fileName;
-            subtitleElement.textContent = folderName ? `来自: ${folderName}` : '主页';
-            
-            // 更新浏览器标签页标题
             document.title = `${fileName} - 文档阅读器`;
         }
-        
-        // 13. 渲染内容
+
+        // 9. 渲染内容
         function renderContent(content) {
             const container = document.getElementById('contentContainer');
             
-            // 简单的 Markdown 转 HTML
+            // 简单的Markdown转HTML
             const html = markdownToHTML(content);
             
             container.innerHTML = `
-                <div class="markdown-body fade-in">
+                <div class="markdown-body">
                     ${html}
                 </div>
             `;
             
-            // 高亮代码
-            highlightCode();
-            
-            // 绑定内部链接
+            // 处理内部链接
             bindInternalLinks();
         }
-        
-        // 14. Markdown 转 HTML
+
+        // 10. Markdown转HTML（简化版）
         function markdownToHTML(markdown) {
             if (!markdown) return '<p>文档内容为空</p>';
             
-            // 替换标题
-            markdown = markdown.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-            markdown = markdown.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-            markdown = markdown.replace(/^### (.*$)/gm, '<h3>$1</h3>');
-            markdown = markdown.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
+            let html = markdown;
             
-            // 替换粗体和斜体
-            markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            markdown = markdown.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // 处理标题
+            html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+            html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+            html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+            html = html.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
             
-            // 替换代码块
-            markdown = markdown.replace(/```([\w]*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+            // 处理粗体和斜体
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
             
-            // 替换内联代码
-            markdown = markdown.replace(/`([^`]+)`/g, '<code>$1</code>');
+            // 处理代码块
+            html = html.replace(/```([\w]*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
             
-            // 替换无序列表
-            markdown = markdown.replace(/^\s*[-*+] (.+)$/gm, '<li>$1</li>');
-            markdown = markdown.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            // 处理内联代码
+            html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
             
-            // 替换有序列表
-            markdown = markdown.replace(/^\s*\d+\. (.+)$/gm, '<li>$1</li>');
-            markdown = markdown.replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>');
+            // 处理无序列表
+            html = html.replace(/^\s*[-*+] (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
             
-            // 替换引用
-            markdown = markdown.replace(/^> (.*$)/gm, '<blockquote><p>$1</p></blockquote>');
+            // 处理有序列表
+            html = html.replace(/^\s*\d+\. (.+)$/gm, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>');
             
-            // 替换链接
-            markdown = markdown.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-                // 如果是内部链接 (.md 文件)
-                if (url.endsWith('.md')) {
-                    return `<a href="#${url}" class="internal-link">${text}</a>`;
-                }
-                // 外部链接
-                return `<a href="${url}" target="_blank">${text}</a>`;
-            });
-            
-            // 替换图片
-            markdown = markdown.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy">');
-            
-            // 替换表格
-            markdown = markdown.replace(/\|(.+)\|/g, (match, row) => {
-                const cells = row.split('|').map(cell => `<td>${cell.trim()}</td>`).join('');
-                return `<tr>${cells}</tr>`;
-            });
-            
-            // 替换段落
-            const lines = markdown.split('\n');
+            // 处理段落
+            const lines = html.split('\n');
             let result = [];
             let paragraph = [];
             
@@ -1005,7 +586,7 @@
                         paragraph = [];
                     }
                 } else if (line.startsWith('<')) {
-                    // HTML 标签
+                    // 已经是HTML标签
                     if (paragraph.length) {
                         result.push(`<p>${paragraph.join(' ')}</p>`);
                         paragraph = [];
@@ -1022,226 +603,75 @@
             
             return result.join('\n');
         }
-        
-        // 15. 代码高亮
-        function highlightCode() {
-            // 使用 highlight.js
-            if (window.hljs) {
-                document.querySelectorAll('pre code').forEach(block => {
-                    hljs.highlightElement(block);
-                });
-            }
-        }
-        
-        // 16. 生成大纲
-        function generateOutline(content) {
-            const outlineList = document.getElementById('outlineList');
-            
-            // 提取标题
-            const headings = [];
-            const lines = content.split('\n');
-            
-            lines.forEach((line, index) => {
-                const match = line.match(/^(#{1,4}) (.*)$/);
-                if (match) {
-                    const level = match[1].length;
-                    const text = match[2].trim();
-                    const id = `heading-${index}`;
-                    
-                    headings.push({
-                        level,
-                        text,
-                        id
-                    });
-                }
-            });
-            
-            if (headings.length === 0) {
-                outlineList.innerHTML = '<div class="loading"><p>此页面没有标题</p></div>';
-                return;
-            }
-            
-            // 生成大纲HTML
-            let html = '';
-            headings.forEach(heading => {
-                html += `
-                    <li class="outline-item">
-                        <a href="#${heading.id}" class="outline-h${heading.level}">
-                            ${heading.text}
-                        </a>
-                    </li>
-                `;
-            });
-            
-            outlineList.innerHTML = html;
-            
-            // 绑定大纲点击事件
-            bindOutlineEvents();
-            
-            // 添加标题ID
-            addHeadingIds();
-        }
-        
-        // 17. 添加标题ID
-        function addHeadingIds() {
-            document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4').forEach((heading, index) => {
-                if (!heading.id) {
-                    heading.id = `heading-${index}`;
-                }
-            });
-        }
-        
-        // 18. 加载初始文档
+
+        // 11. 初始化加载
         async function loadInitialDocument() {
             const hash = window.location.hash.substring(1);
             
-            if (hash) {
-                // 从 URL hash 加载
+            if (hash && hash.trim() !== '') {
                 await loadDocument(hash);
             } else {
-                // 加载 README.md
                 await loadDocument('README.md');
             }
         }
-        
-        // 19. 绑定事件
+
+        // 12. 绑定事件
         function bindEvents() {
-            // 移动端切换按钮
-            document.getElementById('mobileToggle').addEventListener('click', toggleMobileSidebar);
-            
-            // 标签页切换
-            document.querySelectorAll('.sidebar-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.dataset.tab;
-                    switchTab(tabId);
-                });
+            // 移动端菜单
+            document.getElementById('mobileToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('show');
             });
             
-            // 文件树点击事件委托
-            document.getElementById('fileTree').addEventListener('click', handleTreeClick);
-            
-            // 监听 hash 变化
-            window.addEventListener('hashchange', handleHashChange);
-            
-            // 监听滚动（用于大纲高亮）
-            window.addEventListener('scroll', handleScroll, { passive: true });
-        }
-        
-        // 20. 处理文件树点击
-        function handleTreeClick(event) {
-            const treeItem = event.target.closest('.tree-item');
-            if (!treeItem) return;
-            
-            event.preventDefault();
-            
-            const type = treeItem.dataset.type;
-            const path = treeItem.dataset.path;
-            
-            if (type === 'folder') {
-                // 切换文件夹展开/折叠
-                toggleFolder(path);
-            } else if (type === 'file') {
-                // 加载文档
-                loadDocument(path);
-                
-                // 移动端自动关闭侧边栏
-                if (window.innerWidth <= 768) {
-                    document.getElementById('sidebar').classList.remove('show');
+            // 监听hash变化
+            window.addEventListener('hashchange', () => {
+                const hash = window.location.hash.substring(1);
+                if (hash && hash !== state.currentFile) {
+                    loadDocument(hash);
                 }
-            }
-        }
-        
-        // 21. 绑定文件夹事件
-        function bindFolderEvents() {
-            document.querySelectorAll('.tree-item.folder').forEach(folder => {
-                folder.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'A') return;
-                    
-                    const path = folder.dataset.path;
-                    toggleFolder(path);
-                });
             });
         }
-        
-        // 22. 切换文件夹
+
+        // 13. 绑定树事件
+        function bindTreeEvents() {
+            document.getElementById('fileTree').addEventListener('click', (e) => {
+                const treeItem = e.target.closest('.tree-item');
+                if (!treeItem) return;
+                
+                e.preventDefault();
+                
+                const type = treeItem.dataset.type;
+                const path = treeItem.dataset.path;
+                
+                if (type === 'folder') {
+                    toggleFolder(path);
+                } else if (type === 'file') {
+                    loadDocument(path);
+                    
+                    // 移动端自动关闭侧边栏
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('sidebar').classList.remove('show');
+                    }
+                }
+            });
+        }
+
+        // 14. 切换文件夹
         function toggleFolder(path) {
-            const isCollapsed = state.collapsedFolders.has(path);
-            
-            if (isCollapsed) {
+            if (state.collapsedFolders.has(path)) {
                 state.collapsedFolders.delete(path);
             } else {
                 state.collapsedFolders.add(path);
             }
             
-            // 重新渲染文件树
-            renderFileTree();
-            
-            // 保存状态
-            saveState();
-        }
-        
-        // 23. 恢复文件夹状态
-        function restoreFolderState() {
-            document.querySelectorAll('.tree-item.folder').forEach(folder => {
-                const path = folder.dataset.path;
-                if (state.collapsedFolders.has(path)) {
-                    folder.classList.add('collapsed');
-                    const childList = folder.nextElementSibling;
-                    if (childList && childList.tagName === 'UL') {
-                        childList.classList.remove('expanded');
-                    }
-                }
-            });
-        }
-        
-        // 24. 确保文件夹展开
-        function ensureFolderExpanded(filePath) {
-            const parts = filePath.split('/');
-            
-            // 遍历所有父文件夹
-            for (let i = 0; i < parts.length - 1; i++) {
-                const folderPath = parts.slice(0, i + 1).join('/');
-                state.collapsedFolders.delete(folderPath);
-            }
-            
-            // 重新渲染文件树
             renderFileTree();
         }
-        
-        // 25. 切换标签页
-        function switchTab(tabId) {
-            state.activeTab = tabId;
-            
-            // 更新标签按钮
-            document.querySelectorAll('.sidebar-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // 显示对应内容
-            if (tabId === 'files') {
-                document.getElementById('fileTree').style.display = 'block';
-                document.getElementById('outlineContainer').classList.remove('active');
-            } else {
-                document.getElementById('fileTree').style.display = 'none';
-                document.getElementById('outlineContainer').classList.add('active');
-            }
-        }
-        
-        // 26. 更新URL
+
+        // 15. 更新URL hash
         function updateUrlHash(filePath) {
             window.location.hash = filePath;
         }
-        
-        // 27. 处理hash变化
-        function handleHashChange() {
-            const hash = window.location.hash.substring(1);
-            if (hash && hash !== state.currentFile) {
-                loadDocument(hash);
-            }
-        }
-        
-        // 28. 更新激活文件
+
+        // 16. 更新激活的文件
         function updateActiveFile() {
             document.querySelectorAll('.tree-item').forEach(item => {
                 item.classList.remove('active');
@@ -1254,154 +684,80 @@
                 }
             }
         }
-        
-        // 29. 绑定内部链接
-        function bindInternalLinks() {
-            document.querySelectorAll('.internal-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const href = link.getAttribute('href').substring(1);
-                    loadDocument(href);
-                });
-            });
+
+        // 17. 确保文件夹展开
+        function ensureFolderExpanded(filePath) {
+            const parts = filePath.split('/');
+            
+            // 遍历所有父文件夹
+            for (let i = 0; i < parts.length - 1; i++) {
+                const folderPath = parts.slice(0, i + 1).join('/');
+                state.collapsedFolders.delete(folderPath);
+            }
+            
+            renderFileTree();
         }
-        
-        // 30. 绑定大纲事件
-        function bindOutlineEvents() {
-            document.querySelectorAll('.outline-item a').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    const targetId = link.getAttribute('href').substring(1);
-                    const targetElement = document.getElementById(targetId);
-                    
-                    if (targetElement) {
-                        // 滚动到标题位置
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
+
+        // 18. 更新侧边栏
+        function updateSidebar() {
+            // 根据当前文件更新侧边栏状态
+            updateActiveFile();
+        }
+
+        // 19. 绑定内部链接
+        function bindInternalLinks() {
+            // 处理Markdown中的链接
+            setTimeout(() => {
+                document.querySelectorAll('a').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && href.endsWith('.md')) {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            loadDocument(href);
                         });
-                        
-                        // 高亮大纲项
-                        document.querySelectorAll('.outline-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-                        link.parentElement.classList.add('active');
                     }
                 });
-            });
+            }, 100);
         }
-        
-        // 31. 处理滚动（大纲高亮）
-        function handleScroll() {
-            if (state.activeTab !== 'outline') return;
-            
-            const headings = document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3');
-            let currentHeading = null;
-            
-            headings.forEach(heading => {
-                const rect = heading.getBoundingClientRect();
-                if (rect.top >= 0 && rect.top <= 200) {
-                    currentHeading = heading.id;
-                }
-            });
-            
-            if (currentHeading) {
-                document.querySelectorAll('.outline-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                
-                const activeOutline = document.querySelector(`.outline-item a[href="#${currentHeading}"]`);
-                if (activeOutline) {
-                    activeOutline.parentElement.classList.add('active');
-                }
-            }
-        }
-        
-        // 32. 切换移动端侧边栏
-        function toggleMobileSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
-        }
-        
-        // 33. 保存状态
-        function saveState() {
-            const stateToSave = {
-                collapsedFolders: Array.from(state.collapsedFolders),
-                activeTab: state.activeTab
-            };
-            
-            try {
-                localStorage.setItem('docs-reader-state', JSON.stringify(stateToSave));
-            } catch (e) {
-                console.warn('无法保存状态:', e);
-            }
-        }
-        
-        // 34. 加载状态
-        function loadState() {
-            try {
-                const saved = localStorage.getItem('docs-reader-state');
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    state.collapsedFolders = new Set(parsed.collapsedFolders || []);
-                    state.activeTab = parsed.activeTab || 'files';
-                }
-            } catch (e) {
-                console.warn('无法加载状态:', e);
-            }
-        }
-        
-        // 35. 显示加载状态
-        function showLoading(message) {
+
+        // 20. 显示加载状态
+        function showLoading() {
             const container = document.getElementById('contentContainer');
             container.innerHTML = `
                 <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i>
-                    <p>${message}</p>
+                    <p>正在加载...</p>
                 </div>
             `;
         }
-        
-        // 36. 隐藏加载状态
-        function hideLoading() {
-            // 加载状态会在渲染内容时被替换
-        }
-        
-        // 37. 显示错误
+
+        // 21. 显示错误
         function showError(message) {
             const container = document.getElementById('contentContainer');
             container.innerHTML = `
                 <div class="loading">
                     <i class="fas fa-exclamation-triangle"></i>
                     <p>${message}</p>
-                    <p style="margin-top: 16px; font-size: 14px;">
-                        <button onclick="location.reload()" style="padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            重新加载
-                        </button>
-                    </p>
+                    <p>请检查文件是否存在，或刷新页面重试。</p>
                 </div>
             `;
         }
-        
-        // ===== 初始化 =====
-        document.addEventListener('DOMContentLoaded', async function() {
-            // 加载保存的状态
-            loadState();
+
+        // ===== 启动应用 =====
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('文档加载完成，启动应用...');
+            console.log('当前URL:', window.location.href);
+            console.log('当前路径:', window.location.pathname);
             
-            // 初始化标签页
-            switchTab(state.activeTab);
-            
-            // 初始化应用
-            await initApp();
-            
-            // 自动隐藏移动端侧边栏
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.remove('show');
+            try {
+                await initApp();
+                await loadInitialDocument();
+                console.log('应用启动成功！');
+            } catch (error) {
+                console.error('应用启动失败:', error);
+                showError('应用启动失败，请检查控制台。');
             }
         });
     </script>
-    
-    <!-- highlight.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
 </body>
 </html>
